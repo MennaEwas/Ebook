@@ -118,6 +118,117 @@ body {
     display: none;
 }
 
+/* Cover page extras */
+.cover-image {
+    max-width: 85%;
+}
+
+.school-name {
+    text-align: center;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-top: 1rem;
+}
+
+.teacher-name {
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #334155;
+    margin-top: 0.4rem;
+}
+
+/* Slide 8 visuals */
+.pip-visual {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.pip-image {
+    max-width: 65%;
+}
+
+.story-scenario {
+    margin-top: 1rem;
+    padding: 1rem 1.25rem;
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    color: #1f2937;
+}
+
+/* Slide 12 hidden image */
+.mystery-figure {
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 1rem;
+}
+
+.question-mark {
+    font-size: 4rem;
+    font-weight: 800;
+    color: #475569;
+    background: #e2e8f0;
+    border-radius: 16px;
+    width: 160px;
+    height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.hidden {
+    display: none;
+}
+
+/* Winning moment */
+.winning-moment {
+    margin-top: 1.25rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    min-height: 60vh;
+}
+
+.winning-text {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #16a34a;
+    margin-top: 0.5rem;
+}
+
+.winning-image {
+    max-width: 320px;
+    width: 100%;
+    height: auto;
+    animation: winningFade 0.6s ease-in-out;
+}
+
+@keyframes winningFade {
+    0% { opacity: 0; transform: scale(0.95); }
+    100% { opacity: 1; transform: scale(1); }
+}
+/* Mystery box blur */
+.blurred-image {
+    filter: blur(12px);
+    transition: filter 0.4s ease;
+}
+
+.blurred-image.revealed {
+    filter: blur(0);
+}
+
 .app-container {
     display: flex;
     flex-direction: column;

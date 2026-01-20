@@ -1,24 +1,31 @@
 <section class="page">
-  <div class="content-area">
-    <h2 class="page-title">You Did It!</h2>
-    <button class="audio-narration-btn" data-audio="slide15">
-        🔊 Listen
-      </button>
-    <img src="assets/images/completion.png" alt="Completion illustration" class="story-image">
-    <p class="instruction">Congratulations! You finished reading "A Borrowed Bunny."</p>
-  </div>
-
-  <div class="activity-area">
-    <div class="badge-container" aria-label="Completion badge">
+  <div class="content-area" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; text-align: center;">
+    
+    <h2 class="page-title" style="font-size: 3rem; margin-bottom: 2rem;">🎉 You Did It! 🎉</h2>
+    
+    <button class="audio-narration-btn" data-audio="slide15" style="margin-bottom: 2rem;">
+      🔊 Listen
+    </button>
+    
+    <h1 class="page-title" style="font-size: 3rem; margin-bottom: 2rem;">
+      Congratulations! You finished reading "A Borrowed Bunny."
+    </h1>
+    
+    <div class="badge-container" aria-label="Completion badge" style="margin: 0 0 2.5rem 0;">
       <div class="badge badge-patient-reader" aria-label="Patient Reader badge">
         <div class="badge-icon">⭐</div>
         <div class="badge-title">Patient Reader</div>
         <div class="badge-description">You read the whole story!</div>
       </div>
     </div>
-
-    <button class="submit-btn restart-story-btn" type="button">Restart Story</button>
+    
+    <div class="activity-area" style="background: linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%); padding: 2.5rem 3rem; border-radius: 20px; box-shadow: 0 8px 20px rgba(102, 126, 234, 0.15); max-width: 500px; width: 100%; border: none;">
+      <button class="submit-btn finish-reward-btn" type="button" style="width: 100%; font-size: 1.4rem; padding: 1.3rem 2rem; margin: 0;">
+        See Your Reward
+      </button>
+    </div>
+    
   </div>
-
+  
   <div class="feedback-area" role="status"></div>
 </section>

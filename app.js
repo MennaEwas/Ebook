@@ -1,5 +1,5 @@
 // App State
-const TOTAL_SLIDES = 15;
+const TOTAL_SLIDES = 16;
 let currentSlide = 0;
 let activityCompleted = false;
 const completedSlides = new Set();
@@ -73,6 +73,18 @@ function playPageFlipSound() {
     }
 }
 
+// Winning sound helper
+function playWinSound() {
+    const sound = document.getElementById("winningSound");
+    if (!sound) return;
+    try {
+        sound.currentTime = 0;
+        sound.play().catch(() => {});
+    } catch (error) {
+        console.debug("Win sound unavailable:", error);
+    }
+}
+
 // Initialize intro section and start button
 document.addEventListener("DOMContentLoaded", () => {
     const startBtn = document.getElementById("start-reading-btn");
@@ -82,6 +94,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (startBtn && introSection && ebookWrapper) {
         // Intro section exists - wait for button click before initializing
         startBtn.addEventListener("click", () => {
+            // Always reset progress when starting
+            localStorage.removeItem('ebook-progress');
+            currentSlide = 0;
+            activityCompleted = false;
+            completedSlides.clear();
+
             // Hide intro section
             introSection.classList.add("hidden");
             // Show e-book wrapper
@@ -90,10 +108,10 @@ document.addEventListener("DOMContentLoaded", () => {
             // Scroll to top
             window.scrollTo(0, 0);
             // Initialize e-book app
-            loadProgress();
+            loadProgress(); // will default to slide 0 after reset
             initProgressIndicator();
             initNavigation();
-            loadSlide(currentSlide);
+            loadSlide(0);
         });
     } else {
         // If intro elements don't exist, initialize app normally (backward compatibility)
@@ -289,6 +307,8 @@ function stopAudio() {
   }
   
   function initAudioNarration(slideIndex) {
+    // Skip narration on winning slide (index 15 => slide16)
+    if (slideIndex === 15) return;
     const page = document.querySelector(".page.active");
     if (!page) return;
   
@@ -408,32 +428,23 @@ function initSlide2() {
     });
 }
 
-// SLIDE 3 - Learning Objectives
+// SLIDE 3 - Shuffle matching answers so order changes each time
 function initSlide3() {
-    const checkboxes = document.querySelectorAll('#page-3 .objective-checkbox');
-    const feedback = document.querySelector('#page-3 .feedback-area');
+    const page = document.querySelector('.page');
+    if (!page) return;
 
-    checkboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', () => {
-            const checked = Array.from(checkboxes).some(cb => cb.checked);
-            if (checked) {
-                markActivityComplete(
-                    feedback,
-                    'Great! Let\'s get started.',
-                    'correct'
-                );
-            } else {
-                if (feedback) {
-                    feedback.className = 'feedback-area';
-                    feedback.textContent = '';
-                }
-                activityCompleted = false;
-                completedSlides.delete(2);
-                saveProgress();
-                updateUI();
-            }
-        });
-    });
+    const defs = page.querySelector('.matching-definitions');
+    if (defs) {
+        const items = Array.from(defs.children);
+        for (let i = items.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            defs.appendChild(items[j]);
+            items.splice(j, 1);
+        }
+    }
+
+    // Reuse existing matching logic for drag/drop
+    initVocabularyMatching();
 }
 
 // SLIDE 4 - Weekly Question (Trusting Pip)
@@ -600,6 +611,36 @@ function initSlide6() {
     });
 }
 
+// SLIDE 7 - Kindness Quick Pick (simple multiple choice)
+function initSlide7() {
+    const page = document.querySelector('.page');
+    if (!page) return;
+
+    const buttons = page.querySelectorAll('.quiz-choice');
+    const feedback = page.querySelector('.feedback-area');
+
+    if (!buttons.length || !feedback) return;
+
+    buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            buttons.forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+
+            const isCorrect = btn.hasAttribute('data-correct');
+            if (isCorrect) {
+                markActivityComplete(
+                    feedback,
+                    'Great choice! Pip feels safe when we are gentle and caring.',
+                    'correct'
+                );
+            } else {
+                feedback.textContent = 'Try again. Which choice helps Pip feel calm and safe?';
+                feedback.className = 'feedback-area show incorrect';
+            }
+        });
+    });
+}
+
 // Vocabulary Matching Drag-and-Drop (MANDATORY IMPLEMENTATION)
 function initVocabularyMatching() {
     // Select elements using querySelectorAll
@@ -760,6 +801,7 @@ function initSlide9() {
     const optionsWrap = page.querySelector('.mystery-options');
     const options = page.querySelectorAll('.mystery-choice');
     const feedback = page.querySelector('.feedback-area');
+    const mysteryImg = page.querySelector('#mystery-box-image');
 
     if (!toggle || !optionsWrap || !options.length || !feedback) return;
 
@@ -783,6 +825,7 @@ function initSlide9() {
                     'Surprise! You found the babies.',
                     'correct'
                 );
+                if (mysteryImg) mysteryImg.classList.add('revealed');
             } else {
                 feedback.textContent = 'Try again.';
                 feedback.className = 'feedback-area show incorrect';
@@ -943,6 +986,8 @@ function initSlide12() {
 
     const choices = page.querySelectorAll('.moment-choice');
     const feedback = page.querySelector('.feedback-area');
+    const hiddenImage = page.querySelector('#hidden-moment-image');
+    const questionMark = page.querySelector('#question-mark');
 
     if (!choices.length || !feedback) return;
 
@@ -958,9 +1003,11 @@ function initSlide12() {
                 choice.classList.add('spotlight-on');
                 markActivityComplete(
                     feedback,
-                    'Yes! That is the biggest moment in the story.',
+                    'Correct answer!',
                     'correct'
                 );
+                if (hiddenImage) hiddenImage.classList.remove('hidden');
+                if (questionMark) questionMark.classList.add('hidden');
             } else {
                 feedback.textContent = 'Try again. Think about the biggest moment with Katya and Pip.';
                 feedback.className = 'feedback-area show incorrect';
@@ -1051,13 +1098,36 @@ function initSlide14() {
     });
 }
 
-// SLIDE 15 - Completion Badge & Restart
+// SLIDE 15 - Completion message only
 function initSlide15() {
+    const page = document.querySelector('.page');
+    if (!page) return;
+
+    // Mark complete so Next is available
+    activityCompleted = true;
+    completedSlides.add(14);
+    saveProgress();
+    updateUI();
+
+    // Wire "See Your Reward" button to go to slide16
+    const rewardBtn = page.querySelector('.finish-reward-btn');
+    if (rewardBtn) {
+        rewardBtn.addEventListener('click', () => {
+            loadSlide(15, 'next'); // slide16 (zero-indexed)
+        });
+    }
+}
+
+// SLIDE 16 - Winning Moment, badge, restart
+function initSlide16() {
     const page = document.querySelector('.page');
     if (!page) return;
 
     const restartBtn = page.querySelector('.restart-story-btn');
     const feedback = page.querySelector('.feedback-area');
+
+    // Play winning sound once when slide loads
+    playWinSound();
 
     if (!restartBtn) return;
 
@@ -1096,7 +1166,7 @@ function initSlideForIndex(i) {
       case 3: initSlide4(); break;
       case 4: initSlide5(); break;
       case 5: initSlide6(); break;
-      case 6: initVocabularyMatching(); break;
+      case 6: initSlide7(); break;
       case 7: initSlide8(); break;
       case 8: initSlide9(); break;
       case 9: initSlide10(); break;
@@ -1105,5 +1175,6 @@ function initSlideForIndex(i) {
       case 12: initSlide13(); break;
       case 13: initSlide14(); break;
       case 14: initSlide15(); break;
+      case 15: initSlide16(); break;
     }
   }

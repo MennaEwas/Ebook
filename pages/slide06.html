@@ -8,23 +8,38 @@
   </div>
 
   <div class="activity-area">
-    <p class="instruction">Build the story hill. Drag the parts from the bottom and place them up the hill in the best order.</p>
+    <p class="instruction">What is the story's plot, climax, and conflict? Write a short answer in each box.</p>
 
-    <div class="story-hill">
-      <div class="sequence-slots" aria-label="Story hill slots">
-        <div class="sequence-slot" data-slot="4">Top</div>
-        <div class="sequence-slot" data-slot="3">Up the hill</div>
-        <div class="sequence-slot" data-slot="2">Getting started</div>
-        <div class="sequence-slot" data-slot="1">Bottom</div>
+    <div class="story-strip plot-elements-inputs" aria-label="Write the plot, climax, and conflict">
+      <div class="story-panel">
+        <h3 class="story-panel-title">Plot</h3>
+        <textarea
+          class="text-input story-strip-input"
+          rows="2"
+          placeholder="Describe the plot..."
+        ></textarea>
       </div>
 
-      <div class="sequence-items" aria-label="Story parts to drag">
-        <div class="sequence-item" draggable="true" data-order="1">Beginning</div>
-        <div class="sequence-item" draggable="true" data-order="2">Problem</div>
-        <div class="sequence-item" draggable="true" data-order="3">Big moment</div>
-        <div class="sequence-item" draggable="true" data-order="4">Ending</div>
+      <div class="story-panel">
+        <h3 class="story-panel-title">Climax</h3>
+        <textarea
+          class="text-input story-strip-input"
+          rows="2"
+          placeholder="Describe the climax..."
+        ></textarea>
+      </div>
+
+      <div class="story-panel">
+        <h3 class="story-panel-title">Conflict</h3>
+        <textarea
+          class="text-input story-strip-input"
+          rows="2"
+          placeholder="Describe the conflict..."
+        ></textarea>
       </div>
     </div>
+
+    <button class="submit-btn story-strip-submit" type="button">Submit answers</button>
   </div>
 
   <div class="feedback-area" role="status"></div>

@@ -8,34 +8,40 @@
   </div>
 
   <div class="activity-area">
-    <p class="instruction">What is the story's plot, climax, and conflict? Write a short answer in each box.</p>
+    <p class="instruction">What is the story's plot, climax, and conflict? Write a short answer in each box (up to 50 words each).</p>
 
     <div class="story-strip plot-elements-inputs" aria-label="Write the plot, climax, and conflict">
       <div class="story-panel">
         <h3 class="story-panel-title">Plot</h3>
         <textarea
-          class="text-input story-strip-input"
-          rows="2"
+          class="text-input story-strip-input plot-input"
+          rows="3"
           placeholder="Describe the plot..."
+          data-max-words="50"
         ></textarea>
+        <div class="word-count"><span class="word-count-current">0</span> / 50 words</div>
       </div>
 
       <div class="story-panel">
         <h3 class="story-panel-title">Climax</h3>
         <textarea
-          class="text-input story-strip-input"
-          rows="2"
+          class="text-input story-strip-input climax-input"
+          rows="3"
           placeholder="Describe the climax..."
+          data-max-words="50"
         ></textarea>
+        <div class="word-count"><span class="word-count-current">0</span> / 50 words</div>
       </div>
 
       <div class="story-panel">
         <h3 class="story-panel-title">Conflict</h3>
         <textarea
-          class="text-input story-strip-input"
-          rows="2"
+          class="text-input story-strip-input conflict-input"
+          rows="3"
           placeholder="Describe the conflict..."
+          data-max-words="50"
         ></textarea>
+        <div class="word-count"><span class="word-count-current">0</span> / 50 words</div>
       </div>
     </div>
 

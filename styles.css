@@ -1007,6 +1007,26 @@ body {
     margin-bottom: 0.75rem;
 }
 
+.word-count {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin-top: 0.5rem;
+    text-align: right;
+}
+
+.word-count-current {
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.word-count.word-limit-exceeded {
+    color: #dc2626;
+}
+
+.word-count.word-limit-exceeded .word-count-current {
+    color: #dc2626;
+}
+
 @media (max-width: 768px) {
     .story-strip {
         grid-template-columns: 1fr;

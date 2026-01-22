@@ -518,96 +518,125 @@ function initSlide5() {
     });
 }
 
-// SLIDE 6 - Plot Elements (Story Hill)
+// SLIDE 6 - Plot Elements (Text Input with Word Limits)
 function initSlide6() {
-    // Attach only when the story-hill activity exists
-    const hill = document.querySelector('.story-hill');
-    if (!hill) return;
-
     const page = document.querySelector('.page');
     if (!page) return;
 
-    const items = page.querySelectorAll('.sequence-item');
-    const slots = page.querySelectorAll('.sequence-slot');
+    // Make next button always available for this slide
+    activityCompleted = true;
+    updateUI();
+
+    const inputs = page.querySelectorAll('.plot-elements-inputs .story-strip-input');
+    const submitBtn = page.querySelector('.story-strip-submit');
     const feedback = page.querySelector('.feedback-area');
 
-    if (!items.length || !slots.length || !feedback) return;
+    if (!inputs.length || !submitBtn || !feedback) return;
 
-    let draggedItem = null;
+    // Helper function to count words
+    function countWords(text) {
+        return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+    }
 
-    items.forEach(item => {
-        item.addEventListener('dragstart', (e) => {
-            if (item.style.display === 'none') {
-                e.preventDefault();
-                return;
+    // Helper function to limit words to max
+    function limitWords(text, maxWords) {
+        const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+        if (words.length <= maxWords) return text;
+        return words.slice(0, maxWords).join(' ');
+    }
+
+    // Initialize word count displays and add event listeners
+    inputs.forEach(input => {
+        const maxWords = parseInt(input.dataset.maxWords) || 50;
+        const wordCountDisplay = input.parentElement.querySelector('.word-count-current');
+        
+        // Update word count on input
+        function updateWordCount() {
+            const text = input.value;
+            const wordCount = countWords(text);
+            
+            if (wordCountDisplay) {
+                wordCountDisplay.textContent = wordCount;
+                if (wordCount > maxWords) {
+                    wordCountDisplay.parentElement.classList.add('word-limit-exceeded');
+                } else {
+                    wordCountDisplay.parentElement.classList.remove('word-limit-exceeded');
+                }
             }
-            draggedItem = item;
-            item.classList.add('dragging');
-            e.dataTransfer.effectAllowed = 'move';
+
+            // Limit words if exceeded
+            if (wordCount > maxWords) {
+                const cursorPos = input.selectionStart;
+                const limitedText = limitWords(text, maxWords);
+                input.value = limitedText;
+                // Try to maintain cursor position
+                const newPos = Math.min(cursorPos, limitedText.length);
+                input.setSelectionRange(newPos, newPos);
+            }
+        }
+
+        input.addEventListener('input', updateWordCount);
+        input.addEventListener('paste', (e) => {
+            setTimeout(updateWordCount, 0);
         });
 
-        item.addEventListener('dragend', () => {
-            item.classList.remove('dragging');
-            // keep draggedItem until drop completes
-        });
+        // Load saved values if any
+        const savedKey = input.classList.contains('plot-input') ? 'plot-element-plot' :
+                        input.classList.contains('climax-input') ? 'plot-element-climax' :
+                        'plot-element-conflict';
+        const saved = localStorage.getItem(savedKey);
+        if (saved) {
+            input.value = saved;
+            updateWordCount();
+        }
+
+        // Initial word count update
+        updateWordCount();
     });
 
-    slots.forEach(slot => {
-        slot.addEventListener('dragover', (e) => {
-            // Don't allow changing a completed slot
-            if (slot.classList.contains('correct')) return;
-            e.preventDefault();
-            slot.classList.add('drag-over');
-        });
+    // Submit button handler
+    submitBtn.addEventListener('click', () => {
+        let allValid = true;
+        const answers = {};
 
-        slot.addEventListener('dragleave', () => {
-            slot.classList.remove('drag-over');
-        });
+        inputs.forEach(input => {
+            const text = input.value.trim();
+            const wordCount = countWords(text);
+            const maxWords = parseInt(input.dataset.maxWords) || 50;
 
-        slot.addEventListener('drop', (e) => {
-            e.preventDefault();
-            slot.classList.remove('drag-over');
-
-            if (!draggedItem) return;
-            if (slot.classList.contains('correct')) return;
-
-            const expected = String(slot.dataset.slot);
-            const actual = String(draggedItem.dataset.order);
-            const isCorrect = expected === actual;
-
-            // Clear any previous dropped content (only if not correct yet)
-            const existing = slot.querySelector('.dropped-item');
-            if (existing) existing.remove();
-
-            if (isCorrect) {
-                // Lock correct placement
-                const dropped = document.createElement('div');
-                dropped.className = 'dropped-item';
-                dropped.textContent = draggedItem.textContent;
-                slot.appendChild(dropped);
-
-                slot.classList.add('correct');
-                draggedItem.style.display = 'none';
-
-                // Check completion: all items placed
-                const allPlaced = Array.from(items).every(i => i.style.display === 'none');
-                if (allPlaced) {
-                    markActivityComplete(
-                        feedback,
-                        'You built the story!',
-                        'correct'
-                    );
-                } else {
-                    feedback.textContent = 'Nice! Keep building the hill.';
-                    feedback.className = 'feedback-area show info';
-                }
-            } else {
-                feedback.textContent = 'Not quite. Try a different spot on the hill.';
-                feedback.className = 'feedback-area show incorrect';
+            if (wordCount > maxWords) {
+                allValid = false;
+                return;
             }
 
-            draggedItem = null;
+            // Save answers
+            const key = input.classList.contains('plot-input') ? 'plot-element-plot' :
+                       input.classList.contains('climax-input') ? 'plot-element-climax' :
+                       'plot-element-conflict';
+            answers[key] = text;
+            localStorage.setItem(key, text);
         });
+
+        if (!allValid) {
+            feedback.textContent = 'Please keep each answer to 50 words or less.';
+            feedback.className = 'feedback-area show incorrect';
+            return;
+        }
+
+        // Check if at least one field has content
+        const hasContent = Array.from(inputs).some(input => input.value.trim().length > 0);
+        if (!hasContent) {
+            feedback.textContent = 'Please write at least one answer before submitting.';
+            feedback.className = 'feedback-area show incorrect';
+            return;
+        }
+
+        // Success feedback
+        markActivityComplete(
+            feedback,
+            'Great work! You\'ve identified the plot elements.',
+            'correct'
+        );
     });
 }
 

@@ -85,8 +85,58 @@ function playWinSound() {
     }
 }
 
+// Reset all application state to ensure clean start on every page load
+// This prevents previous answers from persisting across reloads
+function resetState() {
+    // Clear all localStorage items
+    localStorage.clear();
+    
+    // Clear all sessionStorage items (for safety, even if not used)
+    sessionStorage.clear();
+    
+    // Reset app state variables
+    currentSlide = 0;
+    activityCompleted = false;
+    completedSlides.clear();
+    
+    // Reset all form elements
+    const allInputs = document.querySelectorAll('input, textarea, select');
+    allInputs.forEach(input => {
+        if (input.type === 'checkbox' || input.type === 'radio') {
+            input.checked = false;
+        } else {
+            input.value = '';
+        }
+    });
+    
+    // Remove all UI state classes that indicate previous interactions
+    const elementsWithStateClasses = document.querySelectorAll('[class*="selected"], [class*="correct"], [class*="wrong"], [class*="incorrect"], [class*="matched"], [class*="filled"], [class*="pinned"], [class*="spotlight-on"], [class*="fallen"]');
+    elementsWithStateClasses.forEach(el => {
+        el.classList.remove('selected', 'correct', 'wrong', 'incorrect', 'matched', 'filled', 'pinned', 'spotlight-on', 'fallen', 'dragging', 'drag-over');
+    });
+    
+    // Reset feedback areas
+    const feedbackAreas = document.querySelectorAll('.feedback-area');
+    feedbackAreas.forEach(feedback => {
+        feedback.textContent = '';
+        feedback.className = 'feedback-area';
+    });
+    
+    // Reset word count displays if they exist
+    const wordCounts = document.querySelectorAll('.word-count-current');
+    wordCounts.forEach(count => {
+        count.textContent = '0';
+        if (count.parentElement) {
+            count.parentElement.classList.remove('word-limit-exceeded');
+        }
+    });
+}
+
 // Initialize intro section and start button
 document.addEventListener("DOMContentLoaded", () => {
+    // Reset state on every page load to ensure clean start
+    resetState();
+    
     const startBtn = document.getElementById("start-reading-btn");
     const introSection = document.getElementById("intro-section");
     const ebookWrapper = document.getElementById("ebook-wrapper");
@@ -580,16 +630,6 @@ function initSlide6() {
             setTimeout(updateWordCount, 0);
         });
 
-        // Load saved values if any
-        const savedKey = input.classList.contains('plot-input') ? 'plot-element-plot' :
-                        input.classList.contains('climax-input') ? 'plot-element-climax' :
-                        'plot-element-conflict';
-        const saved = localStorage.getItem(savedKey);
-        if (saved) {
-            input.value = saved;
-            updateWordCount();
-        }
-
         // Initial word count update
         updateWordCount();
     });
@@ -782,9 +822,6 @@ function initSlide8() {
     const input = page.querySelector('.one-sentence-input');
     const saveBtn = page.querySelector('.submit-btn');
     const feedback = page.querySelector('.feedback-area');
-
-    const saved = localStorage.getItem('prediction');
-    if (saved) input.value = saved;
 
     saveBtn.addEventListener('click', () => {
         const text = input.value.trim();
@@ -1088,13 +1125,6 @@ function initSlide14() {
     const feedback = page.querySelector('.feedback-area');
 
     if (!inputs.length || !submitBtn || !feedback) return;
-
-    // Load any saved sentences (optional)
-    const keys = ['beginning', 'middle', 'end'];
-    inputs.forEach((input, index) => {
-        const saved = localStorage.getItem(`story-strip-${keys[index]}`);
-        if (saved) input.value = saved;
-    });
 
     submitBtn.addEventListener('click', () => {
         // Validate: one short sentence in each panel

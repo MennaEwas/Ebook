@@ -5,7 +5,7 @@
         🔊 Listen
       </button>
     <img src="assets/images/completion.png" alt="Completion illustration" class="story-image">
-    <p class="instruction">Write one short sentence to describe the beginning, middle, and end of the story.</p>
+    <p class="instruction">Write one short sentence to describe the beginning, middle, and end of the story (up to 50 words each).</p>
   </div>
   
 
@@ -15,30 +15,36 @@
         <h3 class="story-panel-title">Beginning</h3>
         <textarea
           class="text-input story-strip-input"
-          rows="2"
+          rows="3"
           placeholder="At the beginning..."
           autocomplete="off"
+          data-max-words="50"
         ></textarea>
+        <div class="word-count"><span class="word-count-current">0</span> / 50 words</div>
       </div>
 
       <div class="story-panel">
         <h3 class="story-panel-title">Middle</h3>
         <textarea
           class="text-input story-strip-input"
-          rows="2"
+          rows="3"
           placeholder="In the middle..."
           autocomplete="off"
+          data-max-words="50"
         ></textarea>
+        <div class="word-count"><span class="word-count-current">0</span> / 50 words</div>
       </div>
 
       <div class="story-panel">
         <h3 class="story-panel-title">End</h3>
         <textarea
           class="text-input story-strip-input"
-          rows="2"
+          rows="3"
           placeholder="At the end..."
           autocomplete="off"
+          data-max-words="50"
         ></textarea>
+        <div class="word-count"><span class="word-count-current">0</span> / 50 words</div>
       </div>
     </div>
 

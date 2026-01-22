@@ -1120,40 +1120,114 @@ function initSlide14() {
     const page = document.querySelector('.page');
     if (!page) return;
 
+    // Make next button always available for this slide
+    activityCompleted = true;
+    updateUI();
+
     const inputs = page.querySelectorAll('.story-strip-input');
     const submitBtn = page.querySelector('.story-strip-submit');
     const feedback = page.querySelector('.feedback-area');
 
     if (!inputs.length || !submitBtn || !feedback) return;
 
+    // Helper function to count words
+    function countWords(text) {
+        return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+    }
+
+    // Helper function to limit words to max
+    function limitWords(text, maxWords) {
+        const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+        if (words.length <= maxWords) return text;
+        return words.slice(0, maxWords).join(' ');
+    }
+
+    // Initialize word count displays and add event listeners
+    inputs.forEach(input => {
+        const maxWords = parseInt(input.dataset.maxWords) || 50;
+        const wordCountDisplay = input.parentElement.querySelector('.word-count-current');
+        
+        // Update word count on input
+        function updateWordCount() {
+            const text = input.value;
+            const wordCount = countWords(text);
+            
+            if (wordCountDisplay) {
+                wordCountDisplay.textContent = wordCount;
+                if (wordCount > maxWords) {
+                    wordCountDisplay.parentElement.classList.add('word-limit-exceeded');
+                } else {
+                    wordCountDisplay.parentElement.classList.remove('word-limit-exceeded');
+                }
+            }
+
+            // Limit words if exceeded
+            if (wordCount > maxWords) {
+                const cursorPos = input.selectionStart;
+                const limitedText = limitWords(text, maxWords);
+                input.value = limitedText;
+                // Try to maintain cursor position
+                const newPos = Math.min(cursorPos, limitedText.length);
+                input.setSelectionRange(newPos, newPos);
+            }
+        }
+
+        input.addEventListener('input', updateWordCount);
+        input.addEventListener('paste', (e) => {
+            setTimeout(updateWordCount, 0);
+        });
+
+        // Initial word count update
+        updateWordCount();
+    });
+
+    // Submit button handler
     submitBtn.addEventListener('click', () => {
-        // Validate: one short sentence in each panel
+        const keys = ['beginning', 'middle', 'end'];
+        let allValid = true;
+
+        // Validate: check word limits and content
         for (let i = 0; i < inputs.length; i++) {
             const text = inputs[i].value.trim();
+            const wordCount = countWords(text);
+            const maxWords = parseInt(inputs[i].dataset.maxWords) || 50;
+
+            if (wordCount > maxWords) {
+                allValid = false;
+                feedback.textContent = 'Please keep each answer to 50 words or less.';
+                feedback.className = 'feedback-area show incorrect';
+                return;
+            }
+
             if (!text) {
                 feedback.textContent = 'Please write one short sentence in each panel.';
                 feedback.className = 'feedback-area show incorrect';
                 return;
             }
+
+            // Validate sentence count (optional - keeping original validation)
             const sentenceEndings = text.match(/[.!?]/g);
             const sentenceCount = sentenceEndings ? sentenceEndings.length : 1;
-            if (sentenceCount > 1 || text.includes('\\n')) {
+            if (sentenceCount > 1 || text.includes('\n')) {
                 feedback.textContent = 'Keep each panel to just one sentence.';
                 feedback.className = 'feedback-area show incorrect';
                 return;
             }
         }
 
-        // Save sentences
-        inputs.forEach((input, index) => {
-            localStorage.setItem(`story-strip-${keys[index]}`, input.value.trim());
-        });
+        // All validations passed
+        if (allValid) {
+            // Save sentences (optional - for session use only, cleared on reload)
+            inputs.forEach((input, index) => {
+                localStorage.setItem(`story-strip-${keys[index]}`, input.value.trim());
+            });
 
-        markActivityComplete(
-            feedback,
-            'You told the story!',
-            'correct'
-        );
+            markActivityComplete(
+                feedback,
+                'You told the story!',
+                'correct'
+            );
+        }
     });
 }
 
